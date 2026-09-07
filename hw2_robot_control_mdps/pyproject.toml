@@ -6,10 +6,27 @@ build-backend = "setuptools.build_meta"
 name = "so101_gym"
 version = "0.1.0"
 description = "SO-101 robot simulation gym environment"
-requires-python = ">=3.8"
+requires-python = ">=3.12"
+dependencies = [
+    "torch>=2.8.0",
+    "gymnasium>=1.2.3",
+    "mujoco>=3.5.0",
+    "numpy>=2.4.2",
+    "stable_baselines3>=2.7.1", # stable_baselines has torch as dependency
+    "tensorboard>=2.20.0",
+]
 
 [tool.setuptools.packages.find]
 include = ["so101_gym*"]
 
 [tool.setuptools.package-data]
 so101_gym = ["assets/**/*"]
+
+# Use pytorch-cpu on Linux
+# [[tool.uv.index]]
+# name = "pytorch-cpu"
+# url = "https://download.pytorch.org/whl/cpu"
+# explicit = true
+
+# [tool.uv.sources]
+# torch = [{ index = "pytorch-cpu" }]
