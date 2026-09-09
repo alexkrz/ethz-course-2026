@@ -1,10 +1,10 @@
+import matplotlib.pyplot as plt
 import mujoco
 import numpy as np
 
 
 def get_lemniscate_keypoint(t, a=0.2):
     """
-    TODO:
     Generate a set of keypoints using Lemniscate of Bernoulli (infinity sign) in the Y-Z plane.
         The formula is: y = a * cos(t) / (1 + sin(t)^2)
                         z = a * cos(t) * sin(t) / (1 + sin(t)^2)
@@ -18,11 +18,13 @@ def get_lemniscate_keypoint(t, a=0.2):
         y (float or np.ndarray): y coordinates of the keypoint on the lemniscate.
         z (float or np.ndarray): z coordinates of the keypoint on the lemniscate.
     """
-    raise NotImplementedError()
+    y = a * np.cos(t) / (1 + np.sin(t) ** 2)
+    z = a * np.cos(t) * np.sin(t) / (1 + np.sin(t) ** 2)
+    return y, z
 
 
 def build_keypoints(count=16, width=0.25, x_offset=0.3, z_offset=0.25):
-    """TODO:
+    """
     Build a set of keypoints (x, y, z) along the lemniscate trajectory.
     Steps:
     1. Generate `count` linearly spaced time values `t` between 0 and 2π (exclusive).
@@ -39,7 +41,12 @@ def build_keypoints(count=16, width=0.25, x_offset=0.3, z_offset=0.25):
     Returns:
         np.ndarray: Array of shape (count, 3) containing the generated keypoints.
     """
-    raise NotImplementedError()
+    t = np.linspace(0.0, 2.0 * np.pi, count)
+    y, z = get_lemniscate_keypoint(t, a=width)
+    x = np.ones(count) * x_offset
+    z = z + z_offset
+    kpts = np.stack((x, y, z)).T
+    return kpts
 
 
 def ik_track(model, data, site_name, target_pos, damping=1e-3, pos_gain=2.0, dt=0.1, max_iters=2000):
@@ -120,3 +127,27 @@ def ik_track(model, data, site_name, target_pos, damping=1e-3, pos_gain=2.0, dt=
     mujoco.mj_kinematics(model, data)
     mujoco.mj_forward(model, data)
     return target_qpos
+
+
+if __name__ == "__main__":
+    t = np.linspace(0.0, 2.0 * np.pi, 500)
+    y, z = get_lemniscate_keypoint(t, a=0.25)
+    keypoints = build_keypoints()
+
+    fig, ax = plt.subplots()
+    ax.plot(y, z, label="Lemniscate")
+    ax.scatter(
+        keypoints[:, 1],
+        keypoints[:, 2] - 0.25,
+        color="tab:red",
+        label="Keypoints",
+        zorder=2,
+    )
+    ax.set_xlabel("y")
+    ax.set_ylabel("z")
+    ax.set_title("Lemniscate of Bernoulli")
+    ax.set_aspect("equal")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
+    fig.tight_layout()
+    plt.show()
