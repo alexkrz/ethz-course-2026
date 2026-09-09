@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import mujoco
 import numpy as np
 
@@ -50,7 +49,7 @@ def build_keypoints(count=16, width=0.25, x_offset=0.3, z_offset=0.25):
 
 
 def ik_track(model, data, site_name, target_pos, damping=1e-3, pos_gain=2.0, dt=0.1, max_iters=2000):
-    """TODO:
+    """
     Implement an IK tracking function that computes the joint configuration to reach a target end-effector position. We ignore orientation tracking for simplicity.
     The function should iteratively update the joint configuration using the Jacobian of the end-effector until it reaches the target within a specified tolerance
     or exceeds the maximum number of iterations. We use the Damped Least Squares method to handle singularities in the Jacobian. For interest, you can learn about
@@ -90,10 +89,11 @@ def ik_track(model, data, site_name, target_pos, damping=1e-3, pos_gain=2.0, dt=
         mujoco.mj_comPos(model, data)
 
         # TODO: compute end-effector position error
-        err_pos = ...
+        err_pos = target_pos - data.site(site_name).xpos
 
         # TODO: check if the 2-norm of the position error is within a small threshold (1e-3), if yes, break the loop
-        ...
+        if np.linalg.norm(err_pos) < 1e-3:
+            break
 
         # Get the Jacobian of the end-effector using mj_jacSite.
         jacp = np.zeros((3, num_joints))  # position Jacobian
@@ -107,7 +107,10 @@ def ik_track(model, data, site_name, target_pos, damping=1e-3, pos_gain=2.0, dt=
         # [pos_gain * err_pos, rot_gain * err_rot]. Since we are ignoring orientation tracking, you can set the rotational part of the weighted error to zero.
         # Instead of directly computing the matrix inverse (which can be numerically unstable), you should use np.linalg.solve to solve the
         # linear system (J @ J^T + damping * I) x = weighted_err for x, and then compute qdot = J^T @ x. This is more stable and efficient than computing the inverse.
-        qdot = ...
+        weighted_error = np.zeros(6)
+        weighted_error[:3] = pos_gain * err_pos
+        x = np.linalg.solve(J @ J.T + damping * np.eye(6), weighted_error)
+        qdot = J.T @ x
 
         # optional clamp to avoid overshoot
         qdot = np.clip(qdot, -2.0, 2.0)
@@ -130,24 +133,48 @@ def ik_track(model, data, site_name, target_pos, damping=1e-3, pos_gain=2.0, dt=
 
 
 if __name__ == "__main__":
-    t = np.linspace(0.0, 2.0 * np.pi, 500)
-    y, z = get_lemniscate_keypoint(t, a=0.25)
-    keypoints = build_keypoints()
+    # import matplotlib.pyplot as plt
+    # t = np.linspace(0.0, 2.0 * np.pi, 500)
+    # y, z = get_lemniscate_keypoint(t, a=0.25)
+    # keypoints = build_keypoints()
 
-    fig, ax = plt.subplots()
-    ax.plot(y, z, label="Lemniscate")
-    ax.scatter(
-        keypoints[:, 1],
-        keypoints[:, 2] - 0.25,
-        color="tab:red",
-        label="Keypoints",
-        zorder=2,
-    )
-    ax.set_xlabel("y")
-    ax.set_ylabel("z")
-    ax.set_title("Lemniscate of Bernoulli")
-    ax.set_aspect("equal")
-    ax.grid(True, alpha=0.3)
-    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
-    fig.tight_layout()
-    plt.show()
+    # fig, ax = plt.subplots()
+    # ax.plot(y, z, label="Lemniscate")
+    # ax.scatter(
+    #     keypoints[:, 1],
+    #     keypoints[:, 2] - 0.25,
+    #     color="tab:red",
+    #     label="Keypoints",
+    #     zorder=2,
+    # )
+    # ax.set_xlabel("y")
+    # ax.set_ylabel("z")
+    # ax.set_title("Lemniscate of Bernoulli")
+    # ax.set_aspect("equal")
+    # ax.grid(True, alpha=0.3)
+    # ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
+    # fig.tight_layout()
+    # plt.show()
+
+    # Dry-run ik_track()
+    import sys
+    from pathlib import Path
+    SCRIPTS_DIR = Path(__file__).resolve().parent
+    ROOT_DIR = SCRIPTS_DIR.parent
+    # Ensure the project root is importable so `env` resolves when running as a script
+    if str(ROOT_DIR) not in sys.path:
+        sys.path.insert(0, str(ROOT_DIR))
+
+    ASSETS_DIR = ROOT_DIR / "so101_gym" / "assets"
+    XML_PATH = ASSETS_DIR / "so100_pos_ctrl.xml"
+
+    keypoints = build_keypoints()
+    keypoint_id = 0
+
+    model = mujoco.MjModel.from_xml_path(str(XML_PATH))
+    data = mujoco.MjData(model)
+    data.mocap_pos[0] = keypoints[keypoint_id]
+
+    site_name = "ee_site"
+
+    target_qpos = ik_track(model, data, site_name, keypoints[keypoint_id])
