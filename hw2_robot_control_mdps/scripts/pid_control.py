@@ -71,5 +71,6 @@ if __name__ == "__main__":
             if np.linalg.norm(total_waypoints[waypoint_id] - data.site(site_name).xpos) < 3e-2:
                 tracking_error_history = np.array([])
                 waypoint_id = (waypoint_id + 1) % len(total_waypoints)
-            time.sleep(model.opt.timestep)
+            simulation_speed = 0.1  # 10% of real-time speed
+            time.sleep(model.opt.timestep / simulation_speed)
     mujoco.set_mjcb_control(None)
