@@ -133,48 +133,48 @@ def ik_track(model, data, site_name, target_pos, damping=1e-3, pos_gain=2.0, dt=
 
 
 if __name__ == "__main__":
-    # import matplotlib.pyplot as plt
-    # t = np.linspace(0.0, 2.0 * np.pi, 500)
-    # y, z = get_lemniscate_keypoint(t, a=0.25)
-    # keypoints = build_keypoints()
+    import matplotlib.pyplot as plt
+    t = np.linspace(0.0, 2.0 * np.pi, 500)
+    y, z = get_lemniscate_keypoint(t, a=0.25)
+    keypoints = build_keypoints()
 
-    # fig, ax = plt.subplots()
-    # ax.plot(y, z, label="Lemniscate")
-    # ax.scatter(
-    #     keypoints[:, 1],
-    #     keypoints[:, 2] - 0.25,
-    #     color="tab:red",
-    #     label="Keypoints",
-    #     zorder=2,
-    # )
-    # ax.set_xlabel("y")
-    # ax.set_ylabel("z")
-    # ax.set_title("Lemniscate of Bernoulli")
-    # ax.set_aspect("equal")
-    # ax.grid(True, alpha=0.3)
-    # ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
-    # fig.tight_layout()
-    # plt.show()
+    fig, ax = plt.subplots()
+    ax.plot(y, z, label="Lemniscate")
+    ax.scatter(
+        keypoints[:, 1],
+        keypoints[:, 2] - 0.25,
+        color="tab:red",
+        label="Keypoints",
+        zorder=2,
+    )
+    ax.set_xlabel("y")
+    ax.set_ylabel("z")
+    ax.set_title("Lemniscate of Bernoulli")
+    ax.set_aspect("equal")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="upper left", bbox_to_anchor=(1.02, 1.0))
+    fig.tight_layout()
+    plt.show()
 
     # Dry-run ik_track()
-    import sys
-    from pathlib import Path
-    SCRIPTS_DIR = Path(__file__).resolve().parent
-    ROOT_DIR = SCRIPTS_DIR.parent
-    # Ensure the project root is importable so `env` resolves when running as a script
-    if str(ROOT_DIR) not in sys.path:
-        sys.path.insert(0, str(ROOT_DIR))
+    # import sys
+    # from pathlib import Path
+    # SCRIPTS_DIR = Path(__file__).resolve().parent
+    # ROOT_DIR = SCRIPTS_DIR.parent
+    # # Ensure the project root is importable so `env` resolves when running as a script
+    # if str(ROOT_DIR) not in sys.path:
+    #     sys.path.insert(0, str(ROOT_DIR))
 
-    ASSETS_DIR = ROOT_DIR / "so101_gym" / "assets"
-    XML_PATH = ASSETS_DIR / "so100_pos_ctrl.xml"
+    # ASSETS_DIR = ROOT_DIR / "so101_gym" / "assets"
+    # XML_PATH = ASSETS_DIR / "so100_pos_ctrl.xml"
 
-    keypoints = build_keypoints()
-    keypoint_id = 0
+    # keypoints = build_keypoints()
+    # keypoint_id = 0
 
-    model = mujoco.MjModel.from_xml_path(str(XML_PATH))
-    data = mujoco.MjData(model)
-    data.mocap_pos[0] = keypoints[keypoint_id]
+    # model = mujoco.MjModel.from_xml_path(str(XML_PATH))
+    # data = mujoco.MjData(model)
+    # data.mocap_pos[0] = keypoints[keypoint_id]
 
-    site_name = "ee_site"
+    # site_name = "ee_site"
 
-    target_qpos = ik_track(model, data, site_name, keypoints[keypoint_id])
+    # target_qpos = ik_track(model, data, site_name, keypoints[keypoint_id])
