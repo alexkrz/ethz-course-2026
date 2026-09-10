@@ -80,6 +80,7 @@ class UpdateCheckpointCallback(BaseCallback):
 
     def _on_rollout_end(self) -> bool:
         self.update_counter += 1
+        self.logger.record("train/iterations", self.update_counter)
         if self.update_counter % self.save_freq_updates == 0:
             filename = f"{self.name_prefix}_{self.update_counter}"
             full_path = self.save_path / filename
