@@ -101,8 +101,13 @@ class PolicyIteration:
             for a in range(self.env.n_actions):
                 qsa = 0.0
                 
-                # TODO: compute qsa_list for all actions at state s
-                raise NotImplementedError("TODO: compute q-values for policy improvement")
+                # NOTE: compute qsa_list for all actions at state s
+
+                for prob, next_state, reward, done in self.env.P[s][a]:
+                    future_value = 0.0 if done else self.v[next_state]
+                    qsa += prob * (reward + self.gamma * future_value)
+                
+                qsa_list.append(qsa)
 
             max_q = max(qsa_list)
             num_best_actions = sum(np.isclose(qsa_list, max_q))
@@ -137,8 +142,9 @@ class PolicyIteration:
         while True:
             old_pi = copy.deepcopy(self.pi)
 
-            # TODO: implement the main loop of policy iteration
-            raise NotImplementedError("TODO: implement policy iteration main loop")
+            # NOTE: implement the main loop of policy iteration
+            self.policy_evaluation()
+            new_pi = self.policy_improvement()
 
             if np.allclose(old_pi, new_pi):
                 break
