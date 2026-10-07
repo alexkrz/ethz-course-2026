@@ -59,21 +59,27 @@ class PolicyIteration:
                 for a in range(self.env.n_actions):
                     qsa = 0.0
                     
-                    # TODO: compute the updated value of state s under the current policy.
+                    # NOTE: compute the updated value of state s under the current policy.
                     #
                     # Suggested steps:
                     # 1. For each action a, compute the action-value under self.v
                     # 2. Weight q_pi(s, a) by pi[s][a]
                     # 3. Sum over all actions to obtain new_v[s]
-                    raise NotImplementedError("TODO: implement policy evaluation update")
+
+                    for prob, next_state, reward, done in self.env.P[s][a]:
+                        future_value = 0.0 if done else self.v[next_state]
+                        qsa += prob * (reward + self.gamma * future_value)
+
+                    qsa_list.append(self.pi[s][a] * qsa)
                 
                 new_v[s] = sum(qsa_list)
                 max_diff = max(max_diff, abs(new_v[s] - self.v[s]))
 
             self.v = new_v
 
-            # TODO: stop when the value function has converged
-            raise NotImplementedError("TODO: add convergence check")
+            # NOTE: stop when the value function has converged
+            if max_diff < self.theta:
+                break
 
     def policy_improvement(self):
         """
