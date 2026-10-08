@@ -52,7 +52,7 @@ def main():
         save_path=log_dir / f"value_iteration_policy_slip_{slip_str}.png",
     )
 
-    show_plots()
+    # show_plots()
 
 
 if __name__ == "__main__":
